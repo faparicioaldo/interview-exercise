@@ -4,6 +4,8 @@
 -	El archivo de entrada debera colocarse en la ruta "C:\tmp\tests.txt"
 -	El archivo de salida se aparecera en la ruta "C:\tmp\result.txt"
 -	Compilar y ejecutar con Java 8
+-	JUnit para pruebas unitarias
+-	Desarrollo en windows
 
 Analisis de ubicacion de segmentos en entradas de archivo:
 
@@ -12,6 +14,10 @@ Analisis de ubicacion de segmentos en entradas de archivo:
 - Linea 3 segmentos E, D, C en posiciones 1, 2 y 3 respectivamente
 - Linea 4 sin segmentos
 
+Observaciones:
+-	Se colocan metodos como publicos para hacer pruebas unitarias
+-	El proceso elimina entradas duplicadas para la salida
+ 
 Algoritmo:
 
 - Leer grupos de 3 lineas separadas por 1 linea vacia (entradas) y almacenar en un Map<Integer, List<Char>>

@@ -17,47 +17,71 @@ import java.util.stream.Collectors;
 
 class Principal {
 
+	//Path to save Input and Results, please change if is neccesary 
+	String basePathFiles = "C:"+File.separator+"tmp"+File.separator;
+	String fileNameInputs = "inputs.txt";
+	String fileNameResults = "results.txt";
+	
+	/**
+	 * Given a file with pipes and underscores
+	 * <ul>
+	 * <li>Get inputs from file to HashMap grouping by item<li> 
+	 * <li>Get real account numbers from each input<li> 
+	 * <li>Validate inputs<li> 
+	 * <li>Write results into a file and in console (only unique accounts no repeated)<li> 
+	 * @param args no in use
+	 * */
 	public static void main(String[] args) throws IOException {
 
 		Principal principal = new Principal();
 		Map<Integer, List<String>> inputs = principal.fileToInputs();
-//		inputs.forEach(a->a.forEach(x->System.err.println(x)));
 
 		Map<String, String> accountNumbers = principal.extractAccountNumbers(inputs);
 		List<String> response = accountNumbers.entrySet().stream()
 				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-				.map(ME -> ME.getKey() + " " + ME.getValue()).peek(System.out::println).collect(Collectors.toList());
-		;
+				.map(ME -> ME.getKey() + " " + ME.getValue())
+				.peek(System.out::println)
+				.collect(Collectors.toList());		
 
-		principal.writeResponse(response);
+		principal.writeResults(response);
 	}
 
-	public void writeResponse(List<String> response) {
+	/**
+	 * Write in a file the results of process input list (account number with pipes and underscore)
+	 * @param real input list (account number with pipes and underscore convert to real numbers)
+	 * */
+	public void writeResults(List<String> response) throws IOException {
+		File file = null;
+		FileWriter writer = null;
+		BufferedWriter bwriter = null;
 		try {
-			String ruta = "C:\\tmp\\result.txt";
-			File file = new File(ruta);
+			file = new File(basePathFiles+fileNameResults);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
-			FileWriter writer = new FileWriter(file);
-			BufferedWriter bwriter = new BufferedWriter(writer);
+			writer = new FileWriter(file);
+			bwriter = new BufferedWriter(writer);
 			for (String res : response) {
 				bwriter.write(res + "\n");
 			}
-
-			bwriter.close();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally {
+			bwriter.close();
 		}
 	}
 
+	/**
+	 * Read a file and get input list (account number with pipes and underscore)
+	 * @return input list (account number with pipes and underscore)
+	 * */
 	public Map<Integer, List<String>> fileToInputs() throws IOException {
-		String file = "C:\\tmp\\tests.txt";
 		BufferedReader reader = null;
 		Map<Integer, List<String>> inputs = null;
 		try {
 			inputs = new HashMap<Integer, List<String>>();
-			reader = new BufferedReader(new FileReader(file));
+			reader = new BufferedReader(new FileReader(basePathFiles+fileNameInputs));
 
 			String currentLine = "";
 			List<String> input = new ArrayList<String>();
@@ -80,41 +104,19 @@ class Principal {
 		return inputs;
 	}
 
+	/**
+	 * Given a input list (account number with pipes and underscore) get real account numbers
+	 * @param input list (account number with pipes and underscore)
+	 * @return list with real account numbers
+	 * */
 	public Map<String, String> extractAccountNumbers(Map<Integer, List<String>> inputs) {
 		Map<String, String> accountNumbers = null;
 		try {
 			accountNumbers = new HashMap<>();
-			for (Entry<Integer, List<String>> input : inputs.entrySet()) {// Itera entradas
-				// grupo de una entrada
-				String inputLine1 = input.getValue().get(0);
-				String inputLine2 = input.getValue().get(1);
-				String inputLine3 = input.getValue().get(2);
+			for (Entry<Integer, List<String>> input : inputs.entrySet()) {// Iterate inputs
 
-				System.err.println(inputLine1);
-				System.err.println(inputLine2);
-				System.err.println(inputLine3);
-
-				int ini = 0;
-				int fin = 3;
-
-				List<Integer> decimal = new ArrayList<>();
-				for (int i = 0; i < 9; i++) {
-
-					String display1 = inputLine1.substring(ini, fin);
-					String display2 = inputLine2.substring(ini, fin);
-					String display3 = inputLine3.substring(ini, fin);
-
-					String binary = segmentsToBinary(display1 + display2 + display3);
-					System.err.println(binary);
-					if (binary == null) {
-						decimal.add(-1);
-					} else {
-						decimal.add(Integer.parseInt(binary, 2));
-					}
-
-					ini = fin;
-					fin += 3;
-				}
+				List<Integer> decimal = inputToDecimal(input);
+				
 				String status = "OK";
 				if (decimal.contains(-1)) {
 					status = "ILL";
@@ -122,7 +124,9 @@ class Principal {
 					status = "ERR";
 				}
 				accountNumbers.put(
-						decimal.stream().map(x -> x.equals(-1) ? "?" : x.toString()).collect(Collectors.joining("")),
+						decimal.stream()
+						.map(x -> x.equals(-1) ? "?" : x.toString())
+						.collect(Collectors.joining("")),
 						status);
 			}
 
@@ -132,6 +136,51 @@ class Principal {
 		return accountNumbers;
 	}
 
+	/**
+	 * Given a input (account number with pipes and underscore) convert to binary and finally in decimal
+	 * @param input (account number with pipes and underscore)
+	 * @return true:valid | false:invalid
+	 * */
+	public List<Integer> inputToDecimal(Entry<Integer, List<String>> input) {
+		List<Integer> decimal = null;
+		String binary = null;
+		try {
+			decimal = new ArrayList<>();
+			
+			// entry set get only 3 first lines, 4 is empty and no neccesary 
+			String inputLine1 = input.getValue().get(0);
+			String inputLine2 = input.getValue().get(1);
+			String inputLine3 = input.getValue().get(2);
+			
+			for (int i = 0; i < 9; i++) {
+				int ini = 0;
+				int fin = 3;
+				String display1 = inputLine1.substring(ini, fin);
+				String display2 = inputLine2.substring(ini, fin);
+				String display3 = inputLine3.substring(ini, fin);
+	
+				binary = segmentsToBinary(display1 + display2 + display3);
+				
+				if (binary == null) {
+					decimal.add(-1);
+				} else {
+					decimal.add(Integer.parseInt(binary, 2));
+				}
+	
+				ini = fin;
+				fin += 3;
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return decimal;
+	}
+
+	/**
+	 * Given a display 7 segments unordered it sort and convert to binary 
+	 * @param 7 segments string unordered
+	 * @return true:valid | false:invalid
+	 * */
 	public String segmentsToBinary(String segmentos) {
 		String binary = null;
 		try {
@@ -144,9 +193,14 @@ class Principal {
 			final char F_SEGMENT = segmentos.charAt(3);
 			final char G_SEGMENT = segmentos.charAt(4);
 
-			sevenSegments.append(A_SEGMENT != ' ' ? 1 : 0).append(B_SEGMENT != ' ' ? 1 : 0)
-					.append(C_SEGMENT != ' ' ? 1 : 0).append(D_SEGMENT != ' ' ? 1 : 0).append(E_SEGMENT != ' ' ? 1 : 0)
-					.append(F_SEGMENT != ' ' ? 1 : 0).append(G_SEGMENT != ' ' ? 1 : 0);
+			sevenSegments
+				.append(A_SEGMENT != ' ' ? 1 : 0)
+				.append(B_SEGMENT != ' ' ? 1 : 0)
+				.append(C_SEGMENT != ' ' ? 1 : 0)
+				.append(D_SEGMENT != ' ' ? 1 : 0)
+				.append(E_SEGMENT != ' ' ? 1 : 0)
+				.append(F_SEGMENT != ' ' ? 1 : 0)
+				.append(G_SEGMENT != ' ' ? 1 : 0);
 
 			binary = Constants.MAP_SEGMENTS_BINARY.get(sevenSegments.toString());
 		} catch (Exception e) {
@@ -155,6 +209,11 @@ class Principal {
 		return binary;
 	}
 
+	/**
+	 * Account number validation with checksum
+	 * @param accountNumber
+	 * @return true:valid | false:invalid
+	 * */
 	public boolean validateAccountNumber(List<Integer> accountNumber) {
 		boolean accountNumberValid = false;
 		try {
