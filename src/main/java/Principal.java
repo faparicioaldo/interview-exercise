@@ -1,4 +1,4 @@
-package com.bunsan.exam;
+
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 class Principal {
 
 	//Path to save Input and Results, please change if is neccesary 
-	String basePathFiles = "C:"+File.separator+"tmp"+File.separator;
+//	String basePathFiles = "C:"+File.separator+"tmp"+File.separator;
+	String basePathFiles = "";
 	String fileNameInputs = "inputs.txt";
 	String fileNameResults = "results.txt";
 	
@@ -235,4 +236,41 @@ class Principal {
 		return accountNumberValid;
 	}
 
+	public class Response {
+		private String status;
+		private String accountNumber;
+
+		public String getStatus() {
+			return status;
+		}
+
+		public void setStatus(String status) {
+			this.status = status;
+		}
+
+		public String getAccountNumber() {
+			return accountNumber;
+		}
+
+		public void setAccountNumber(String accountNumber) {
+			this.accountNumber = accountNumber;
+		}
+
+	}
+
+	public static class Constants {
+		public final static Map<String, String> MAP_SEGMENTS_BINARY = new HashMap<>();
+		static{
+			MAP_SEGMENTS_BINARY.put("1111110", "0000");
+			MAP_SEGMENTS_BINARY.put("0110000", "0001");
+			MAP_SEGMENTS_BINARY.put("1101101", "0010");
+			MAP_SEGMENTS_BINARY.put("1111001", "0011");
+			MAP_SEGMENTS_BINARY.put("0110011", "0100");
+			MAP_SEGMENTS_BINARY.put("1011011", "0101");
+			MAP_SEGMENTS_BINARY.put("1011111", "0110");
+			MAP_SEGMENTS_BINARY.put("1110000", "0111");
+			MAP_SEGMENTS_BINARY.put("1111111", "1000");
+			MAP_SEGMENTS_BINARY.put("1111011", "1001");
+		}
+	}
 }
