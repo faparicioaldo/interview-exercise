@@ -116,7 +116,7 @@ class Principal {
 			for (Entry<Integer, List<String>> input : inputs.entrySet()) {// Iterate inputs
 
 				List<Integer> decimal = inputToDecimal(input);
-				
+
 				String status = "OK";
 				if (decimal.contains(-1)) {
 					status = "ILL";
@@ -152,9 +152,9 @@ class Principal {
 			String inputLine2 = input.getValue().get(1);
 			String inputLine3 = input.getValue().get(2);
 			
+			int ini = 0;
+			int fin = 3;
 			for (int i = 0; i < 9; i++) {
-				int ini = 0;
-				int fin = 3;
 				String display1 = inputLine1.substring(ini, fin);
 				String display2 = inputLine2.substring(ini, fin);
 				String display3 = inputLine3.substring(ini, fin);
