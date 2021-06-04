@@ -66,7 +66,7 @@ class Principal {
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println("Error al escribir archivo, verificar permisos" + e);
 		}finally {
 			bwriter.close();
 		}
@@ -96,7 +96,7 @@ class Principal {
 				i++;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println("Error al leer archivo, verificar permisos" + e);
 		} finally {
 			reader.close();
 		}
@@ -131,7 +131,7 @@ class Principal {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println("El archivo contiene lineas con menos de 27 caracteres, por favor validar" + e);
 		}
 		return accountNumbers;
 	}
@@ -171,7 +171,7 @@ class Principal {
 				fin += 3;
 			}
 		}catch(Exception e) {
-			e.printStackTrace();
+			System.err.println("El archivo contiene lineas con menos de 27 caracteres, por favor validar" + e);
 		}
 		return decimal;
 	}
@@ -204,7 +204,7 @@ class Principal {
 
 			binary = Constants.MAP_SEGMENTS_BINARY.get(sevenSegments.toString());
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println("El archivo contiene lineas con menos de 27 caracteres, por favor validar" + e);
 		}
 		return binary;
 	}
@@ -230,7 +230,7 @@ class Principal {
 				accountNumberValid = true;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println("El archivo contiene lineas con menos de 27 caracteres, por favor validar" + e);
 		}
 		return accountNumberValid;
 	}

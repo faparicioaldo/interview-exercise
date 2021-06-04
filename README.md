@@ -1,7 +1,7 @@
 # Ejercicio Bunsan | Analisis Fundamental
 
 ##	INDICACIONES
--	El archivo de entrada debera colocarse en la ruta "C:\tmp\tests.txt"
+-	El archivo de entrada debera colocarse en la ruta "C:\tmp\inputs.txt"
 -	El archivo de salida se aparecera en la ruta "C:\tmp\result.txt"
 -	Compilar y ejecutar con Java 8
 -	JUnit para pruebas unitarias
