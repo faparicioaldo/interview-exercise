@@ -34,6 +34,8 @@ public class AccountsOcrServiceImpl implements AccountsOcrService{
 		accountsOcrHelper = new AccountsOcrHelperImpl();
 		Map<Integer, List<String>> inputs = accountsOcrHelper.fileToInputs(sourceFileName);
 		
+		if(inputs == null) {return;}
+			
 		Map<String, String> accountNumbers = accountsOcrHelper.extractAccountNumbers(inputs);
 		List<String> response = accountNumbers.entrySet().stream()
 				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))

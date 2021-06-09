@@ -69,7 +69,7 @@ public class AccountsOcrHelperImpl implements AccountsOcrHelper{
 				i++;
 			}
 		} catch (Exception e) {
-			log.error("Error al leer archivo, verificar permisos", e);
+			log.error("No se encontro el archivo o no tiene permisos para leerlo");
 		}
 
 		return inputs;
@@ -142,7 +142,7 @@ public class AccountsOcrHelperImpl implements AccountsOcrHelper{
 				fin += 3;
 			}
 		}catch(Exception e) {
-			log.error("El archivo contiene lineas con menos de 27 caracteres, por favor validar", e);
+			log.error("Ocurrio un problema al leer el archivo");
 		}
 		return decimal;
 	}
