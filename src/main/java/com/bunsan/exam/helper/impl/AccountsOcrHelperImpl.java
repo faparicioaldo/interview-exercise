@@ -1,62 +1,42 @@
-
+package com.bunsan.exam.helper.impl;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-class Principal {
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
 
-	//Path to save Input and Results, please change if is neccesary 
-//	String basePathFiles = "C:"+File.separator+"tmp"+File.separator;
-	String basePathFiles = "";
-	String fileNameInputs = "inputs.txt";
-	String fileNameResults = "results.txt";
-	
-	/**
-	 * Given a file with pipes and underscores
-	 * <ul>
-	 * <li>Get inputs from file to HashMap grouping by item<li> 
-	 * <li>Get real account numbers from each input<li> 
-	 * <li>Validate inputs<li> 
-	 * <li>Write results into a file and in console (only unique accounts no repeated)<li> 
-	 * @param args no in use
-	 * */
-	public static void main(String[] args) throws IOException {
+import com.bunsan.exam.Constants;
+import com.bunsan.exam.helper.AccountsOcrHelper;
 
-		Principal principal = new Principal();
-		Map<Integer, List<String>> inputs = principal.fileToInputs();
+@Component
+public class AccountsOcrHelperImpl implements AccountsOcrHelper{
 
-		Map<String, String> accountNumbers = principal.extractAccountNumbers(inputs);
-		List<String> response = accountNumbers.entrySet().stream()
-				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-				.map(ME -> ME.getKey() + " " + ME.getValue())
-				.peek(System.out::println)
-				.collect(Collectors.toList());		
-
-		principal.writeResults(response);
-	}
+    private static final Logger log = LogManager.getLogger(AccountsOcrHelperImpl.class);
 
 	/**
 	 * Write in a file the results of process input list (account number with pipes and underscore)
 	 * @param real input list (account number with pipes and underscore convert to real numbers)
 	 * */
-	public void writeResults(List<String> response) throws IOException {
+	public void writeResults(List<String> response, String pathToWriteResult) throws IOException {
 		File file = null;
 		FileWriter writer = null;
 		BufferedWriter bwriter = null;
 		try {
-			file = new File(basePathFiles+fileNameResults);
+			file = new File(pathToWriteResult);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
@@ -67,9 +47,10 @@ class Principal {
 			}
 			
 		} catch (Exception e) {
-			System.err.println("Error al escribir archivo, verificar permisos" + e);
+			log.error("Error al escribir archivo, verificar permisos", e);
 		}finally {
-			bwriter.close();
+			if(bwriter != null)
+				bwriter.close();
 		}
 	}
 
@@ -77,29 +58,25 @@ class Principal {
 	 * Read a file and get input list (account number with pipes and underscore)
 	 * @return input list (account number with pipes and underscore)
 	 * */
-	public Map<Integer, List<String>> fileToInputs() throws IOException {
-		BufferedReader reader = null;
+	public Map<Integer, List<String>> fileToInputs(String fileNameInClasspath) throws IOException {
 		Map<Integer, List<String>> inputs = null;
-		try {
-			inputs = new HashMap<Integer, List<String>>();
-			reader = new BufferedReader(new FileReader(basePathFiles+fileNameInputs));
-
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource(fileNameInClasspath).getInputStream()))) {
+			inputs = new HashMap<>();	
+			
 			String currentLine = "";
-			List<String> input = new ArrayList<String>();
+			List<String> input = new ArrayList<>();
 			int i = 1;
 			while ((currentLine = reader.readLine()) != null) {
 				if (i % 4 == 0) {// Restart the each 4 rows
 					inputs.put(i, input);
-					input = new ArrayList<String>();
+					input = new ArrayList<>();
 				} else {// row 4 is ignored
 					input.add(currentLine);
 				}
 				i++;
 			}
 		} catch (Exception e) {
-			System.err.println("Error al leer archivo, verificar permisos" + e);
-		} finally {
-			reader.close();
+			log.error("Error al leer archivo, verificar permisos", e);
 		}
 
 		return inputs;
@@ -116,23 +93,23 @@ class Principal {
 			accountNumbers = new HashMap<>();
 			for (Entry<Integer, List<String>> input : inputs.entrySet()) {// Iterate inputs
 
-				List<Integer> decimal = inputToDecimal(input);
+				List<Integer> decimalAccountNumber = inputToDecimal(input);
 
 				String status = "OK";
-				if (decimal.contains(-1)) {
+				if (decimalAccountNumber.contains(-1)) {
 					status = "ILL";
-				} else if (!validateAccountNumber(decimal)) {
+				} else if (!validateAccountNumber(decimalAccountNumber)) {
 					status = "ERR";
 				}
 				accountNumbers.put(
-						decimal.stream()
+						decimalAccountNumber.stream()
 						.map(x -> x.equals(-1) ? "?" : x.toString())
 						.collect(Collectors.joining("")),
 						status);
 			}
 
 		} catch (Exception e) {
-			System.err.println("El archivo contiene lineas con menos de 27 caracteres, por favor validar" + e);
+			log.error("El archivo contiene lineas con menos de 27 caracteres, por favor validar", e);
 		}
 		return accountNumbers;
 	}
@@ -172,7 +149,7 @@ class Principal {
 				fin += 3;
 			}
 		}catch(Exception e) {
-			System.err.println("El archivo contiene lineas con menos de 27 caracteres, por favor validar" + e);
+			log.error("El archivo contiene lineas con menos de 27 caracteres, por favor validar", e);
 		}
 		return decimal;
 	}
@@ -185,6 +162,9 @@ class Principal {
 	public String segmentsToBinary(String segmentos) {
 		String binary = null;
 		try {
+			
+			if(segmentos.length()<9) {return null;};
+			
 			StringBuilder sevenSegments = new StringBuilder();
 			final char A_SEGMENT = segmentos.charAt(1);
 			final char B_SEGMENT = segmentos.charAt(5);
@@ -205,7 +185,7 @@ class Principal {
 
 			binary = Constants.MAP_SEGMENTS_BINARY.get(sevenSegments.toString());
 		} catch (Exception e) {
-			System.err.println("El archivo contiene lineas con menos de 27 caracteres, por favor validar" + e);
+			log.error("El archivo contiene lineas con menos de 27 caracteres, por favor validar", e);
 		}
 		return binary;
 	}
@@ -231,46 +211,8 @@ class Principal {
 				accountNumberValid = true;
 			}
 		} catch (Exception e) {
-			System.err.println("El archivo contiene lineas con menos de 27 caracteres, por favor validar" + e);
+			log.error("El archivo contiene lineas con menos de 27 caracteres, por favor validar", e);
 		}
 		return accountNumberValid;
-	}
-
-	public class Response {
-		private String status;
-		private String accountNumber;
-
-		public String getStatus() {
-			return status;
-		}
-
-		public void setStatus(String status) {
-			this.status = status;
-		}
-
-		public String getAccountNumber() {
-			return accountNumber;
-		}
-
-		public void setAccountNumber(String accountNumber) {
-			this.accountNumber = accountNumber;
-		}
-
-	}
-
-	public static class Constants {
-		public final static Map<String, String> MAP_SEGMENTS_BINARY = new HashMap<>();
-		static{
-			MAP_SEGMENTS_BINARY.put("1111110", "0000");
-			MAP_SEGMENTS_BINARY.put("0110000", "0001");
-			MAP_SEGMENTS_BINARY.put("1101101", "0010");
-			MAP_SEGMENTS_BINARY.put("1111001", "0011");
-			MAP_SEGMENTS_BINARY.put("0110011", "0100");
-			MAP_SEGMENTS_BINARY.put("1011011", "0101");
-			MAP_SEGMENTS_BINARY.put("1011111", "0110");
-			MAP_SEGMENTS_BINARY.put("1110000", "0111");
-			MAP_SEGMENTS_BINARY.put("1111111", "1000");
-			MAP_SEGMENTS_BINARY.put("1111011", "1001");
-		}
 	}
 }

@@ -1,0 +1,8 @@
+package com.bunsan.exam.service;
+
+import java.io.IOException;
+
+public interface AccountsOcrService {
+
+	public void extractAccountNumbers() throws IOException;
+}
