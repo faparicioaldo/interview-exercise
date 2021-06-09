@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bunsan.exam.helper.impl.AccountsOcrHelperImpl;
@@ -18,6 +19,7 @@ public class AccountsOcrServiceImpl implements AccountsOcrService{
 
     private static final Logger log = LogManager.getLogger(AccountsOcrServiceImpl.class);
 		
+    @Autowired
 	private AccountsOcrHelperImpl accountsOcrHelper;
 	
 	/**
@@ -31,7 +33,6 @@ public class AccountsOcrServiceImpl implements AccountsOcrService{
 	 * */
 	@Override
 	public void extractAccountNumbers(String sourceFileName, String targetFileName) throws IOException {
-		accountsOcrHelper = new AccountsOcrHelperImpl();
 		Map<Integer, List<String>> inputs = accountsOcrHelper.fileToInputs(sourceFileName);
 		
 		if(inputs == null) {return;}
