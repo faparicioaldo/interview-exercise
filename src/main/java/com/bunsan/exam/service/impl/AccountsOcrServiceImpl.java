@@ -20,9 +20,6 @@ public class AccountsOcrServiceImpl implements AccountsOcrService{
 		
 	private AccountsOcrHelperImpl accountsOcrHelper;
 	
-	final String INPUTS_FILE_NAME_IN_CLASSPATH = "inputs.txt";
-	final String RESULTS_FILE_NAME_IN_CLASSPATH = "results.txt";
-	
 	/**
 	 * Given a file with pipes and underscores
 	 * <ul>
@@ -33,9 +30,9 @@ public class AccountsOcrServiceImpl implements AccountsOcrService{
 	 * @param args no in use
 	 * */
 	@Override
-	public void extractAccountNumbers() throws IOException {
+	public void extractAccountNumbers(String sourceFileName, String targetFileName) throws IOException {
 		accountsOcrHelper = new AccountsOcrHelperImpl();
-		Map<Integer, List<String>> inputs = accountsOcrHelper.fileToInputs(INPUTS_FILE_NAME_IN_CLASSPATH);
+		Map<Integer, List<String>> inputs = accountsOcrHelper.fileToInputs(sourceFileName);
 		
 		Map<String, String> accountNumbers = accountsOcrHelper.extractAccountNumbers(inputs);
 		List<String> response = accountNumbers.entrySet().stream()
@@ -44,7 +41,7 @@ public class AccountsOcrServiceImpl implements AccountsOcrService{
 				.peek(x->log.info(x))
 				.collect(Collectors.toList());		
 
-		accountsOcrHelper.writeResults(response, RESULTS_FILE_NAME_IN_CLASSPATH);
+		accountsOcrHelper.writeResults(response, targetFileName);
 		
 	}
 

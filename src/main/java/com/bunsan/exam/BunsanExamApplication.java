@@ -25,12 +25,14 @@ public class BunsanExamApplication implements CommandLineRunner {
 	}
 
 	@Override
-	public void run(String... args) {
-		try {
-			accountsOcrService.extractAccountNumbers();
+	public void run(String... args) throws IOException {
+			
+			String sourceFileName = args != null && args.length >= 1 && args[0] != null && args[0].length() > 0 ? args[0] : "inputs.txt";
+			String targetFileName = args != null && args.length >= 2 && args[1] != null && args[1].length() > 0 ? args[1] : "results.txt";			
+			
+			log.info("Source filename: " + sourceFileName);
+			log.info("Target filename: " + targetFileName);
+			accountsOcrService.extractAccountNumbers(sourceFileName, targetFileName);
 
-		} catch (IOException e) {
-			log.error("IOException", e);
-		}
 	}
 }

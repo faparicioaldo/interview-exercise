@@ -4,5 +4,5 @@ import java.io.IOException;
 
 public interface AccountsOcrService {
 
-	public void extractAccountNumbers() throws IOException;
+	public void extractAccountNumbers(String sourceFileName, String targetFileName) throws IOException;
 }

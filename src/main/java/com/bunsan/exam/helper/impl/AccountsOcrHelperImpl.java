@@ -3,9 +3,9 @@ package com.bunsan.exam.helper.impl;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,11 +16,10 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import com.bunsan.exam.Constants;
 import com.bunsan.exam.helper.AccountsOcrHelper;
+import com.bunsan.exam.util.Constants;
 
 @Component
 public class AccountsOcrHelperImpl implements AccountsOcrHelper{
@@ -33,24 +32,17 @@ public class AccountsOcrHelperImpl implements AccountsOcrHelper{
 	 * */
 	public void writeResults(List<String> response, String pathToWriteResult) throws IOException {
 		File file = null;
-		FileWriter writer = null;
-		BufferedWriter bwriter = null;
-		try {
-			file = new File(pathToWriteResult);
+		try (BufferedWriter bwriter  = new BufferedWriter(new FileWriter(file = new File(pathToWriteResult)))){
 			if (!file.exists()) {
-				file.createNewFile();
+				file.createNewFile();				
 			}
-			writer = new FileWriter(file);
-			bwriter = new BufferedWriter(writer);
+			
 			for (String res : response) {
 				bwriter.write(res + "\n");
 			}
 			
 		} catch (Exception e) {
 			log.error("Error al escribir archivo, verificar permisos", e);
-		}finally {
-			if(bwriter != null)
-				bwriter.close();
 		}
 	}
 
@@ -60,19 +52,20 @@ public class AccountsOcrHelperImpl implements AccountsOcrHelper{
 	 * */
 	public Map<Integer, List<String>> fileToInputs(String fileNameInClasspath) throws IOException {
 		Map<Integer, List<String>> inputs = null;
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource(fileNameInClasspath).getInputStream()))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(fileNameInClasspath))) {
 			inputs = new HashMap<>();	
 			
 			String currentLine = "";
 			List<String> input = new ArrayList<>();
-			int i = 1;
+			int i = 1, counter = 1;
 			while ((currentLine = reader.readLine()) != null) {
 				if (i % 4 == 0) {// Restart the each 4 rows
-					inputs.put(i, input);
+					inputs.put(counter, input);
 					input = new ArrayList<>();
+					counter++;
 				} else {// row 4 is ignored
 					input.add(currentLine);
-				}
+				}				
 				i++;
 			}
 		} catch (Exception e) {

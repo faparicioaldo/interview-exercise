@@ -2,8 +2,13 @@ package com.bunsan.exam.helper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +24,13 @@ class AccountsOcrHelperTest {
 
 	private AccountsOcrHelperImpl accountsOcrHelper = new AccountsOcrHelperImpl();
 
+	private List<String> dataInFile = 
+			Arrays.asList(
+					"000000000 OK",
+					"222222222 NOK",
+					"11111?111 ILL"
+					);
+	
 	final List<Integer> decimalAccountNumber_1_OK = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
 	final List<Integer> decimalAccountNumber_2_OK = Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0);
 	final List<Integer> decimalAccountNumber_3_OK = Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -101,6 +113,38 @@ class AccountsOcrHelperTest {
 			  ))
 			).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	
+//	final Map<Integer, List<String>> inputsOK = 
+//			Stream.of(
+//				new AbstractMap.SimpleEntry<>(1, Arrays.asList(
+//				   "                           "
+//				  ,"   |  |  |  |  |  |  |  |  |"
+//				  ,SEVEN_SEGMENTS_ACCOUNT_NUMBER_0_LINE_3_OK
+//				  )),
+//				new AbstractMap.SimpleEntry<>(2, Arrays.asList(
+//				   "  _  _  _  _  _  _  _  _  _ "
+//				  ," | || || || || || || || || |"
+//				  ," |_||_||_||_||_||_||_||_||_|"
+//				  )),
+//				new AbstractMap.SimpleEntry<>(3, Arrays.asList(
+//				   SEVEN_SEGMENTS_ACCOUNT_NUMBER_2_LINE_1_OK
+//				  ,SEVEN_SEGMENTS_ACCOUNT_NUMBER_2_LINE_2_OK
+//				  ,SEVEN_SEGMENTS_ACCOUNT_NUMBER_2_LINE_3_OK
+//				  )),
+//				new AbstractMap.SimpleEntry<>(4, Arrays.asList(
+//				   SEVEN_SEGMENTS_ACCOUNT_NUMBER_3_LINE_1_OK
+//				  ,SEVEN_SEGMENTS_ACCOUNT_NUMBER_3_LINE_2_OK
+//				  ,SEVEN_SEGMENTS_ACCOUNT_NUMBER_3_LINE_3_OK
+//				  ))
+//				).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+	
+//	{16=[                           ,
+//	                                |  |  |  |  |  |  |  |  |,
+//	                                |  |  |  |  |  |  |  |  |], 
+//			4=[ _  _  _  _  _  _  _  _  _ , | || || || || || || || || |, |_||_||_||_||_||_||_||_||_|], 
+//			8=[                           ,   |  |     |  |  |     |  |,   |  |  |  |  |  |  |  |  |], 
+//			12=[    _  _     _  _  _  _  _ ,   | _| _||_||_ |_   ||_||_|,   ||_  _|  | _||_|  ||_| _|]}
+	
 	@Test
 	void validateAccountNumberTestOK() {
 
@@ -166,12 +210,22 @@ class AccountsOcrHelperTest {
 	}
 	
 	@Test
-	void fileToInputsTest() {		
-		assertEquals(mapResult, accountsOcrHelper.extractAccountNumbers(inputsOK));
+	void fileToInputsTest() throws IOException {		
+		String fileName = "inputs2.txt";
+		assertEquals(inputsOK, accountsOcrHelper.fileToInputs(fileName));
 	}
 	
 	@Test
-	void writeResultsTest() {		
-		assertEquals(mapResult, accountsOcrHelper.extractAccountNumbers(inputsOK));
+	void writeResultsTest() throws IOException {		
+		String fileName = "salida2.txt";
+		accountsOcrHelper.writeResults(dataInFile,fileName);
+		try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+			for(String row : dataInFile) {
+				assertEquals(row, reader.readLine());
+			}
+		} catch (Exception e) {
+			fail("error");
+		}
+
 	}
 }

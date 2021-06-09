@@ -1,4 +1,4 @@
-package com.bunsan.exam;
+package com.bunsan.exam.util;
 
 import java.util.HashMap;
 import java.util.Map;
